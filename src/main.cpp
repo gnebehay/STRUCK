@@ -34,6 +34,8 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
+#include "vot.hpp"
+
 using namespace std;
 using namespace cv;
 
@@ -61,6 +63,48 @@ int main(int argc, char* argv[])
 	{
 		cout << "error: no features specified in config" << endl;
 		return EXIT_FAILURE;
+	}
+
+	Tracker tracker(conf);
+
+	//Check if --challenge was passed as an argument
+	bool challengeMode = false;
+	for (int i = 1; i < argc; i++) {
+		if (strcmp("--challenge", argv[i]) == 0) {
+			challengeMode = true;
+		}
+	}
+
+	if (challengeMode) {
+		//load region, images and prepare for output
+		Mat frameOrig;
+		Mat frame_scaled;
+		Mat frame;
+		VOT vot_io("region.txt", "images.txt", "output.txt");
+		vot_io.getNextImage(frameOrig);
+		cvtColor(frame_scaled, frame, CV_RGB2GRAY);
+		cv::Rect initPos = vot_io.getInitRectangle();
+		vot_io.outputBoundingBox(initPos);
+		FloatRect initBB_vot = IntRect(initPos.x*scaleW_vot, initPos.y*scaleH_vot, initPos.width*scaleW_vot, initPos.height*scaleH_vot);
+		tracker.Initialise(frame, initBB_vot);
+
+		while (vot_io.getNextImage(frameOrig) == 1){
+			resize(frameOrig, frame_scaled, Size(conf.frameWidth, conf.frameHeight));
+			cvtColor(frame_scaled, frame, CV_RGB2GRAY);
+			
+			tracker.Track(frame);
+			const FloatRect& bb = tracker.GetBB();
+			float x = bb.XMin()/scaleW_vot;
+			float y = bb.YMin()/scaleH_vot;
+			float w = bb.Width()/scaleW_vot;
+			float h = bb.Height()/scaleH_vot;
+
+			cv::Rect output = cv::Rect(x,y,w,h);
+
+			vot_io.outputBoundingBox(output);
+		}
+
+		return 0;
 	}
 	
 	ofstream outFile;
@@ -156,7 +200,6 @@ int main(int argc, char* argv[])
 	
 	
 	
-	Tracker tracker(conf);
 	if (!conf.quietMode)
 	{
 		namedWindow("result");
