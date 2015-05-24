@@ -6,7 +6,7 @@ find_package(OpenCV REQUIRED)
 
 set(CMAKE_BUILD_TYPE Release)
 
-INCLUDE_DIRECTORIES ( src/GraphUtils /usr/include/eigen2 ${OpenCV_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES ( src/GraphUtils /usr/local/include/eigen3 ${OpenCV_INCLUDE_DIRS})
 
 add_executable(STRUCK
     src/Config.cpp
