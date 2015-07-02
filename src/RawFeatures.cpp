@@ -31,6 +31,7 @@
 #include "Rect.h"
 
 #include <iostream>
+#include <opencv2/imgproc.hpp>
 
 using namespace Eigen;
 using namespace cv;
