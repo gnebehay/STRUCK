@@ -31,8 +31,8 @@
 #include <iostream>
 #include <fstream>
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
 
 #include "vot.hpp"
 

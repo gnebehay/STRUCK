@@ -5,7 +5,7 @@ quietMode = 0
 debugMode = 1
 
 # base path for video sequences.
-sequenceBasePath = sequences
+sequenceBasePath = ../sequences
 
 # path for output results file.
 # comment this out to disable output.
@@ -13,7 +13,7 @@ sequenceBasePath = sequences
 
 # video sequence to run the tracker on.
 # comment this out to use webcam.
-sequenceName = girl
+sequenceName = surfer
 
 # frame size for use during tracking.
 # the input image will be scaled to this size.

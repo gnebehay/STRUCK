@@ -25,38 +25,48 @@
  * 
  */
 
-#include "RawFeatures.h"
-#include "Config.h"
-#include "Sample.h"
+#ifndef TRACKER_H
+#define TRACKER_H
+
 #include "Rect.h"
 
-#include <iostream>
+#include <vector>
+#include <Eigen/Core>
+#include <opencv2/core.hpp>
 
-using namespace Eigen;
-using namespace cv;
+class Config;
+class Features;
+class Kernel;
+class LaRank;
+class ImageRep;
 
-static const int kPatchSize = 16;
-
-RawFeatures::RawFeatures(const Config& conf) :
-	m_patchImage(kPatchSize, kPatchSize, CV_8UC1)
+class Tracker
 {
-	SetCount(kPatchSize*kPatchSize);
-}
-
-void RawFeatures::UpdateFeatureVector(const Sample& s)
-{
-	IntRect rect = s.GetROI(); // note this truncates to integers
-	cv::Rect roi(rect.XMin(), rect.YMin(), rect.Width(), rect.Height());
-	cv::resize(s.GetImage().GetImage(0)(roi), m_patchImage, m_patchImage.size());
-	//equalizeHist(m_patchImage, m_patchImage);
+public:
+	Tracker(const Config& conf);
+	~Tracker();
 	
-	int ind = 0;
-	for (int i = 0; i < kPatchSize; ++i)
-	{
-		uchar* pixel = m_patchImage.ptr(i);
-		for (int j = 0; j < kPatchSize; ++j, ++pixel, ++ind)
-		{
-			m_featVec[ind] = ((double)*pixel)/255;
-		}
-	}
-}
+	void Initialise(const cv::Mat& frame, FloatRect bb);
+	void Reset();
+	void Track(const cv::Mat& frame);
+	void Debug();
+	
+	inline const FloatRect& GetBB() const { return m_bb; }
+	inline bool IsInitialised() const { return m_initialised; }
+	
+private:
+	const Config& m_config;
+	bool m_initialised;
+	std::vector<Features*> m_features;
+	std::vector<Kernel*> m_kernels;
+	LaRank* m_pLearner;
+	FloatRect m_bb;
+	cv::Mat m_debugImage;
+	bool m_needsIntegralImage;
+	bool m_needsIntegralHist;
+	
+	void UpdateLearner(const ImageRep& image);
+	void UpdateDebugImage(const std::vector<FloatRect>& samples, const FloatRect& centre, const std::vector<double>& scores);
+};
+
+#endif

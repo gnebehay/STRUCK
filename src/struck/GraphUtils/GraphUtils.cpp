@@ -9,10 +9,9 @@
 //#include <tchar.h>
 
 // OpenCV
-#include <opencv/cv.h>
-#include <opencv/cxcore.h>
+#include <opencv2/core.hpp>
 #ifdef USE_HIGHGUI
-	#include <opencv/highgui.h>
+	#include <opencv2/highgui.hpp>
 #endif
 
 #ifndef UCHAR
@@ -409,8 +408,9 @@ void showUCharGraph(const char *name, const uchar *arraySrc, int nArrayLength, i
 void showImage(const IplImage *img, int delay_ms, char *name)
 {
 #ifdef USE_HIGHGUI
-	if (!name)
-		name = "Image";
+	if (!name) {
+    strcpy(name, ((std::string)"Image").c_str());
+  }
 	cvNamedWindow(name, CV_WINDOW_AUTOSIZE);
 	cvShowImage(name, img);
 	cvWaitKey(delay_ms);
